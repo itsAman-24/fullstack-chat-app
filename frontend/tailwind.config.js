@@ -7,9 +7,15 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      screens: {
+        xs: '500px', // Custom breakpoint for 500px
+        md: '880px',
+      },
+
+    },
   },
-  plugins: [daisyui],
+  plugins: [daisyui, require('tailwind-scrollbar')],
   daisyui: {
     themes: [
       "light",

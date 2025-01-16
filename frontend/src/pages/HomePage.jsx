@@ -1,7 +1,9 @@
-import { useChatStore } from "../store/useChatStore";
+import { useChatStore } from "../store/useChatStore"; 
 import Sidebar from "../components/Sidebar";
 import NoChatSelected from "../components/NoChatSelected";
 import ChatContainer from "../components/ChatContainer";
+import StoryUpload from "../components/StoryUpload"; // Import StoryUpload
+import StoryList from "../components/StoryList"; // Import StoryList
 
 const HomePage = () => {
   const { selectedUser } = useChatStore();
@@ -9,15 +11,26 @@ const HomePage = () => {
   return (
     <div className="h-screen bg-base-200">
       <div className="flex items-center justify-center pt-20 px-4">
-        <div className="bg-base-100 rounded-lg shadow-cl w-full max-w-6xl h-[calc(100vh-8rem)]">
+        <div className="bg-base-100 rounded-lg shadow-cl w-full max-w-7xl h-[calc(100vh-8rem)]">
           <div className="flex h-full rounded-lg overflow-hidden">
             <Sidebar />
 
-            {!selectedUser ? <NoChatSelected /> : <ChatContainer />}
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col">
+              {/* Story Section */}
+              <div className="p-4 border-b-2 border-b-stone-800  flex">
+                <StoryUpload />
+                <StoryList />
+              </div>
+
+              {/* Chat Section */}
+              {!selectedUser ? <NoChatSelected /> : <ChatContainer />}
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 };
+
 export default HomePage;

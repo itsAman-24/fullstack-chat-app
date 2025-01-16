@@ -12,13 +12,17 @@
   "dependencies": {
     "axios": "^1.7.9",
     "browser-image-compression": "^2.0.2",
+    "cloudinary-react": "^1.8.1",
     "fullstack-chat_application-(project)": "file:..",
+    "js-cookie": "^3.0.5",
     "lucide-react": "^0.469.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-draggable": "^4.4.6",
     "react-hot-toast": "^2.4.1",
     "react-router-dom": "^7.1.1",
     "socket.io-client": "^4.8.1",
+    "tailwind-scrollbar": "^3.1.0",
     "zustand": "^5.0.2"
   },
   "devDependencies": {
