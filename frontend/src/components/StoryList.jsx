@@ -61,9 +61,9 @@ const StoryList = () => {
   }, {});
 
   return (
-    <div className="p-2">
+    <div className="p-1">
       <div className="overflow-y-auto h-full max-h-[400px] max-w-[150px] sm:max-w-[400px] md:max-w-[640px] lg:max-w-[720px]  scroll-container scrollbar-none">
-        <div className="inline-flex space-x-4 overflow-x-auto pb-4">
+        <div className="inline-flex space-x-4 overflow-x-auto">
           {Object.values(groupedStories).map((userStories) => {
             const firstStory = userStories[0];
             const isViewed = userStories.every((story) =>
