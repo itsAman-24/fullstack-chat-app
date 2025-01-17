@@ -2,6 +2,7 @@ import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
+import { sendVerificationCode, sendWelcomeEmail } from "../middleware/verificationCode.js";
 
 export const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -27,16 +28,25 @@ export const signup = async (req, res) => {
     console.log("Salt generated");
 
     const hashedPassword = await bcrypt.hash(password, salt);
+    //Generating verification code
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
     console.log("Password hashed:", hashedPassword);
 
     const newUser = new User({
       fullName,
       email,
       password: hashedPassword,
+      verificationCode
     });
 
     await newUser.save();
-    console.log("New user saved:", newUser);
+
+    //sending verification code to the user registerrd
+    await sendVerificationCode(newUser.email, newUser.verificationCode);
+
+    // res.redirect("")
+    // console.log("New user saved:", newUser);
 
     generateToken(newUser._id, res);
     console.log("Token generated successfully");
@@ -47,10 +57,36 @@ export const signup = async (req, res) => {
       email: newUser.email,
       profilePic: newUser.profilePic || null,
     });
+
+    // history.push("/verify");
   } catch (error) {
     console.error("Error in signup controller:", error.stack);
     res.status(500).json({ message: error.message || "Internal Server Error" });
   }
+};
+
+export const verifyEmail = async (req, res) => {
+  try {
+    const { code } = req.body;
+    const user = await User.findOne({verificationCode: code});
+
+    if(!user) {
+      return res.status(400).json({success: false, message: "Invalid or Expired Code"});
+    }
+
+    user.isVarified = true;
+    user.verificationCode = undefined;
+
+    await user.save();
+    await sendWelcomeEmail(user.email, user.fullName);
+    return res.status(200).json({success: true, message: "Email verified successfully"});
+
+
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({success: false, message: "Internal server error"});
+  }
+
 };
 
 export const login = async (req, res) => {

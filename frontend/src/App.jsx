@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import SignUpPage from "./pages/SignUpPage";
+import VerificationCode from "./pages/VerificationCode";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore";
 import { useThemeStore } from "./store/useThemeStore";
@@ -12,14 +13,16 @@ import { Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
 
 const App = () => {
-  const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
+  const { authUser, checkAuth, isCheckingAuth, onlineUsers, isVerified } = useAuthStore();
   const { theme } = useThemeStore();
 
   // console.log({ onlineUsers });
 
   useEffect(() => {
+    console.log("isVerified:", isVerified);  // Log the state here
     checkAuth();
-  }, [checkAuth]);
+  }, [checkAuth, isVerified]);  // Add isVerified to the dependency array
+  
 
   // console.log({ authUser });
 
@@ -32,10 +35,14 @@ const App = () => {
 
   return (
     <div data-theme={theme}>
-      <Navbar />
+    {/* {  console.log("isvarified: ", isVerified)} */}
+      {/* { isVerified &&  <Navbar />} */}
 
+      <Navbar />
+    
       <Routes>
         <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
+        <Route path="/verify" element={<VerificationCode />} />
         <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
         <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
         <Route path="/settings" element={<SettingsPage />} />

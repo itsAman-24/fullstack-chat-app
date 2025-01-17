@@ -9,6 +9,8 @@ export const useAuthStore = create((set, get) => ({
   authUser: null,
   isSigningUp: false,
   isLoggingIn: false,
+  isVerified: false,
+  // isVarifying: false,
   isUpdatingProfile: false,
   isCheckingAuth: true,
   onlineUsers: [],
@@ -36,11 +38,15 @@ export const useAuthStore = create((set, get) => ({
       const res = await axiosInstance.post("/auth/signup", data, {
         withCredentials: true,
       });
+
+      toast.success("Signup successful! Check your email for verification.");
+
+      window.location.href = "/verify";
       
-      console.log(res);
+      // console.log(res);
       
       set({ authUser: res.data });
-      toast.success("Account created successfully");
+      // toast.success("Account created successfully");
       get().connectSocket();
     } catch (error) {
       toast.error(error.response.data.message);
@@ -48,6 +54,24 @@ export const useAuthStore = create((set, get) => ({
       set({ isSigningUp: false });
     }
   },
+
+  verifyEmail: async (code) => {
+    console.log("code for the verification", code);
+    try {
+      const response = await axiosInstance.post("/auth/verifyemail", { code });
+  
+      if (response) {
+        toast.success("Email verified successfully!");
+      }
+  
+      window.location.href = "/"; // Redirect to homepage
+    } catch (error) {
+      toast.error(error.response.data.message);
+    } finally {
+      set({ isVerified: true }); 
+    }
+  },
+  
 
   login: async (data) => {
     set({ isLoggingIn: true });

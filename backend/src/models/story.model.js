@@ -17,7 +17,7 @@ const storySchema = new mongoose.Schema(
     },
     storyExpiry: {
       type: Date,
-      default: () => new Date(Date.now() + 24 * 60 * 60 * 1000), // Expires in 24 hours
+      default: () => new Date(Date.now() + 4 * 60 * 60 * 1000), // Expires in 4 hours
     },
   },
   { timestamps: true }

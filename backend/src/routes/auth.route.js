@@ -1,10 +1,13 @@
 import express from "express";
-import { signup, login, logout, updateProfile, checkAuth } from "../controllers/auth.controller.js";
+import { signup, login, logout, updateProfile, checkAuth, verifyEmail } from "../controllers/auth.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
+// import { verify } from "jsonwebtoken";
 
 const router = express.Router();
 
 router.post("/signup", signup);
+
+router.post("/verifyemail", verifyEmail)
 
 router.post("/login", login);
 
