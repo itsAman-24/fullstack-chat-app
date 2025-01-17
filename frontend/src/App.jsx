@@ -19,7 +19,7 @@ const App = () => {
   // console.log({ onlineUsers });
 
   useEffect(() => {
-    console.log("isVerified:", isVerified);  // Log the state here
+    // console.log("isVerified:", isVerified);  // Log the state here
     checkAuth();
   }, [checkAuth, isVerified]);  // Add isVerified to the dependency array
   
@@ -41,7 +41,7 @@ const App = () => {
       <Navbar />
     
       <Routes>
-        <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
+        <Route path="/" element={authUser && isVerified ? <HomePage /> : <Navigate to="/login" />} />
         <Route path="/verify" element={<VerificationCode />} />
         <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
         <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />

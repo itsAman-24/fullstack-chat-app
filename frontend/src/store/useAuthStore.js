@@ -59,6 +59,8 @@ export const useAuthStore = create((set, get) => ({
     console.log("code for the verification", code);
     try {
       const response = await axiosInstance.post("/auth/verifyemail", { code });
+
+      console.log("response: ", response);
   
       if (response) {
         toast.success("Email verified successfully!");
