@@ -2,10 +2,12 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios.js";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
+import { persist } from "zustand/middleware";
 
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "/";
 
-export const useAuthStore = create((set, get) => ({
+export const useAuthStore = create(
+(set, get) => ({
   authUser: null,
   isSigningUp: false,
   isLoggingIn: false,
@@ -41,7 +43,7 @@ export const useAuthStore = create((set, get) => ({
 
       toast.success("Signup successful! Check your email for verification.");
 
-      window.location.href = "/verify";
+      window.location.href = `/verify?email=${encodeURIComponent(data.email)}`;
       
       // console.log(res);
       
@@ -55,22 +57,20 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  verifyEmail: async (code) => {
-    console.log("code for the verification", code);
+  verifyEmail: async (email, code) => {
+    console.log("Verifying email with code:", { email, code });
     try {
-      const response = await axiosInstance.post("/auth/verifyemail", { code });
-
-      console.log("response: ", response);
+      const response = await axiosInstance.post("/auth/verifyemail", { email, code });
+  
+      console.log("Verification response: ", response);
   
       if (response) {
+        set({ isVerified: true });
         toast.success("Email verified successfully!");
+        window.location.href = "/"; // Redirect to homepage
       }
-  
-      window.location.href = "/"; // Redirect to homepage
     } catch (error) {
-      toast.error(error.response.data.message);
-    } finally {
-      set({ isVerified: true }); 
+      toast.error(error.response?.data?.message || "Verification failed");
     }
   },
   

@@ -1,68 +1,45 @@
-import React, { useState, useEffect } from "react";
-import { useAuthStore } from "../store/useAuthStore";
+import React, { useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { useAuthStore } from "../store/useAuthStore.js"; // Update the path as per your project structure
 
-const EnterVerificationCode = ({ onSubmit }) => {
-  const [code, setCode] = useState("");
-  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
-  const { verifyEmail } = useAuthStore();
+const VerifyPage = () => {
+  const [searchParams] = useSearchParams();
+  const email = searchParams.get("email"); // Extract the email from query parameters
+  const [verificationCode, setVerificationCode] = useState(""); // State to hold the code input
+  const verifyEmail = useAuthStore((state) => state.verifyEmail); // Access the verifyEmail function from the store
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsButtonDisabled(true); // Disable the button after submit
-    await verifyEmail(code);
+  const handleVerify = () => {
+    if (!verificationCode) {
+      alert("Please enter the verification code.");
+      return;
+    }
+    verifyEmail(email, verificationCode); // Call the verifyEmail function with email and code
   };
-
-  const handleInputChange = (e) => {
-    setCode(e.target.value);
-    setIsButtonDisabled(false); // Enable the button when input changes
-  };
-
-  useEffect(() => {
-    // Reset button disabled state when the code changes
-    setIsButtonDisabled(code.trim() === "");
-  }, [code]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 px-4 sm:px-6 md:px-8">
-      <div className="bg-stone-300 p-8 rounded-lg shadow-md w-full max-w-md sm:max-w-sm">
-        <h2 className="text-2xl font-semibold text-center mb-4 text-gray-800">
-          Enter Verification Code
-        </h2>
-        <p className="text-sm text-gray-600 text-center mb-6">
-          A verification code has been sent to your email. Please enter it below.
+    <div className="flex items-center justify-center min-h-screen bg-gray-800">
+      <div className="max-w-md w-full bg-white p-6 rounded-lg shadow-md text-center">
+        <h1 className="text-2xl font-bold text-gray-800 mb-4">Email Verification</h1>
+        <p className="text-gray-600 mb-6">
+          We sent a verification code to your email:{" "}
+          <span className="font-semibold text-blue-600">{email}</span>
         </p>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              htmlFor="verificationCode"
-              className="block text-sm font-medium text-gray-700 text-center"
-            >
-              Verification Code
-            </label>
-            <input
-              type="text"
-              inputmode="numeric"
-              id="verificationCode"
-              value={code}
-              onChange={handleInputChange}
-              className="mt-1 block w-full px-4 py-2 text-center border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              placeholder="Enter code"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={isButtonDisabled}
-            className={`w-full py-2 px-4 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
-              isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
-            }`}
-          >
-            Submit Code
-          </button>
-        </form>
+        <input
+          type="text"
+          placeholder="Enter verification code"
+          value={verificationCode}
+          onChange={(e) => setVerificationCode(e.target.value)}
+          className="w-full px-4 py-2 mb-4 border text-center rounded-md text-gray-100 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          onClick={handleVerify}
+          className="w-full py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition duration-200"
+        >
+          Verify Email
+        </button>
       </div>
     </div>
   );
 };
 
-export default EnterVerificationCode;
+export default VerifyPage;

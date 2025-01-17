@@ -40,7 +40,7 @@ export const useChatStore = create((set, get) => ({
       });
       
 
-      console.log("Stories fetched:", res.data); // Log the fetched data
+      // console.log("Stories fetched:", res.data); // Log the fetched data
   
       set({ status: res.data }); // Update the state with the fetched data
     } catch (error) {

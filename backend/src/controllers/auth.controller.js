@@ -1,5 +1,6 @@
 import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
+import TempUser from "../models/temp.model.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
 import { sendVerificationCode, sendWelcomeEmail } from "../middleware/verificationCode.js";
@@ -9,6 +10,7 @@ export const signup = async (req, res) => {
   console.log("Request received:", { fullName, email, password });
 
   try {
+    // Validate input
     if (!fullName || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -17,48 +19,44 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: "Password must be at least 6 characters" });
     }
 
+    // Check if the email already exists in the verified Users collection
     const user = await User.findOne({ email });
-    console.log("User found:", user);
-
     if (user) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    console.log("Salt generated");
+    // Check if the email already exists in the TempUser collection
+    const tempUserExists = await TempUser.findOne({ email });
+    if (tempUserExists) {
+      return res.status(400).json({ message: "A verification email has already been sent" });
+    }
 
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    //Generating verification code
+    console.log("Password hashed successfully");
+
+    // Generate a 6-digit verification code
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    console.log("Password hashed:", hashedPassword);
-
-    const newUser = new User({
+    // Save user details in the TempUser collection
+    const tempUser = new TempUser({
       fullName,
       email,
       password: hashedPassword,
-      verificationCode
+      verificationCode,
     });
 
-    await newUser.save();
+    await tempUser.save();
+    console.log("Temporary user saved:", tempUser);
 
-    //sending verification code to the user registerrd
-    await sendVerificationCode(newUser.email, newUser.verificationCode);
-
-    // res.redirect("")
-    // console.log("New user saved:", newUser);
-
-    generateToken(newUser._id, res);
-    console.log("Token generated successfully");
+    // Send the verification code to the user's email
+    await sendVerificationCode(tempUser.email, tempUser.verificationCode);
+    // console.log("Verification code sent successfully");
 
     res.status(201).json({
-      _id: newUser._id,
-      fullName: newUser.fullName,
-      email: newUser.email,
-      profilePic: newUser.profilePic || null,
+      message: "Verification email sent. Please check your inbox to verify your account.",
     });
-
-    // history.push("/verify");
   } catch (error) {
     console.error("Error in signup controller:", error.stack);
     res.status(500).json({ message: error.message || "Internal Server Error" });
@@ -66,27 +64,33 @@ export const signup = async (req, res) => {
 };
 
 export const verifyEmail = async (req, res) => {
-  try {
-    const { code } = req.body;
-    const user = await User.findOne({verificationCode: code});
+  const { email, code } = req.body;
 
-    if(!user) {
-      return res.status(400).json({success: false, message: "Invalid or Expired Code"});
+  try {
+    const tempUser = await TempUser.findOne({ email });
+
+    if (!tempUser) {
+      return res.status(400).json({ message: "User not found" });
     }
 
-    user.isVarified = true;
-    user.verificationCode = undefined;
+    if (tempUser.verificationCode !== code) {
+      return res.status(400).json({ message: "Invalid verification code" });
+    }
 
-    await user.save();
-    await sendWelcomeEmail(user.email, user.fullName);
-    return res.status(200).json({success: true, message: "Email verified successfully"});
+    // Move the user to the User collection or mark as verified
+    const newUser = new User({
+      fullName: tempUser.fullName,
+      email: tempUser.email,
+      password: tempUser.password,
+    });
 
+    await newUser.save();
+    await TempUser.deleteOne({ email });
 
+    res.status(200).json({ message: "Email verified successfully" });
   } catch (error) {
-    console.log(error)
-    return res.status(500).json({success: false, message: "Internal server error"});
+    res.status(500).json({ message: error.message });
   }
-
 };
 
 export const login = async (req, res) => {
@@ -103,15 +107,15 @@ export const login = async (req, res) => {
     if (!isPasswordCorrect) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
-
     generateToken(user._id, res);
-
     res.status(200).json({
       _id: user._id,
       fullName: user.fullName,
       email: user.email,
       profilePic: user.profilePic,
     });
+
+
   } catch (error) {
     console.log("Error in login controller", error.message);
     res.status(500).json({ message: "Internal Server Error" });

@@ -145,7 +145,7 @@ export const uploadStory = async (req, res) => {
 
 // Add Fetch Stories Function
 export const getStories = async (req, res) => {
-  console.log("controller calling")
+  // console.log("controller calling")
     try {
     const userId = req.query.userId;
     // console.log("User ID from protected middleware:", userId);
@@ -160,7 +160,7 @@ export const getStories = async (req, res) => {
 
     // Fetch stories for the specific user
     const stories = await Story.find();
-    console.log(stories)
+    // console.log(stories)
 
     res.status(200).json(stories);
   } catch (error) {

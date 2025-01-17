@@ -18,3 +18,25 @@ export const generateToken = (userId, res) => {
 
   return token;
 };
+
+
+// utils/verificationCodeStore.js
+
+const verificationCodes = {}; // In-memory store (use Redis or database in production)
+
+export const saveVerificationCode = (email, code) => {
+  // Save the verification code with an expiration time (e.g., 15 minutes)
+  verificationCodes[email] = { code, expiresAt: Date.now() + 15 * 60 * 1000 }; // Expire in 15 minutes
+};
+
+export const getStoredVerificationCode = (email) => {
+  const storedCode = verificationCodes[email];
+
+  if (storedCode && Date.now() < storedCode.expiresAt) {
+    return storedCode.code;
+  }
+
+  // If code is expired or not found
+  delete verificationCodes[email]; // Clean up expired codes
+  return null;
+};
