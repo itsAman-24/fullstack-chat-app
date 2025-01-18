@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios.js";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
-import { persist } from "zustand/middleware";
 
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "/";
 
@@ -44,12 +43,7 @@ export const useAuthStore = create(
       toast.success("Signup successful! Check your email for verification.");
 
       window.location.href = `/verify?email=${encodeURIComponent(data.email)}`;
-      
-      // console.log(res);
-      
-      set({ authUser: res.data });
-      // toast.success("Account created successfully");
-      get().connectSocket();
+
     } catch (error) {
       toast.error(error.response.data.message);
     } finally {
@@ -65,7 +59,8 @@ export const useAuthStore = create(
       console.log("Verification response: ", response);
   
       if (response) {
-        set({ isVerified: true });
+        get().connectSocket();
+        set({ authUser: response.data, isVerified: true });
         toast.success("Email verified successfully!");
         window.location.href = "/"; // Redirect to homepage
       }

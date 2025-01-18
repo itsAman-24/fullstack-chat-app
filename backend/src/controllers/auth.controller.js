@@ -85,6 +85,7 @@ export const verifyEmail = async (req, res) => {
     });
 
     await newUser.save();
+    await sendWelcomeEmail(newUser.email, newUser.fullName);
     await TempUser.deleteOne({ email });
 
     res.status(200).json({ message: "Email verified successfully" });

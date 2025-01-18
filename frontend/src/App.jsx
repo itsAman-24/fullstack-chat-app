@@ -23,7 +23,7 @@ const App = () => {
   }, [checkAuth]); 
   
 
-  // console.log({ authUser });
+  console.log({ authUser });
 
   if (isCheckingAuth && !authUser)
     return (
@@ -34,7 +34,7 @@ const App = () => {
 
   return (
     <div data-theme={theme}>
-    {/* {  console.log("isvarified: ", isVerified)} */}
+    {  console.log("isvarified: ", isVerified)}
       {/* { isVerified &&  <Navbar />} */}
 
       <Navbar />
